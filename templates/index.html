@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventario de Equipos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .no-result {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">📋 Inventario de Equipos</h1>
+
+        <!-- Formulario de búsqueda -->
+        <form method="get" class="row g-2 mb-4 align-items-end">
+            <div class="col-md-4">
+                <label for="campo" class="form-label">Filtrar por:</label>
+                <select name="campo" id="campo" class="form-select">
+                    <option value="tipo" {% if campo == 'tipo' %}selected{% endif %}>Tipo</option>
+                    <option value="marca" {% if campo == 'marca' %}selected{% endif %}>Marca</option>
+                    <option value="modelo" {% if campo == 'modelo' %}selected{% endif %}>Modelo</option>
+                    <option value="serie" {% if campo == 'serie' %}selected{% endif %}>Serie</option>
+                    <option value="estado" {% if campo == 'estado' %}selected{% endif %}>Estado</option>
+                    <option value="ubicacion" {% if campo == 'ubicacion' %}selected{% endif %}>Ubicación</option>
+                    <option value="responsable" {% if campo == 'responsable' %}selected{% endif %}>Responsable</option>
+                    <option value="id" {% if campo == 'id' %}selected{% endif %}>ID</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label for="buscar" class="form-label">Valor a buscar:</label>
+                <input type="text" name="buscar" id="buscar" class="form-control" value="{{ buscar }}" placeholder="Escribe aquí...">
+            </div>
+
+            <div class="col-md-2 d-flex">
+                <button type="submit" class="btn btn-primary w-100 me-2">🔍 Filtrar</button>
+                {% if buscar %}
+                <a href="/" class="btn btn-outline-secondary w-100">❌ Limpiar</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Botón Agregar -->
+        <div class="text-center mb-3">
+            <a href="/agregar" class="btn btn-success">➕ Agregar Equipo</a>
+        </div>
+
+        <!-- Tabla o mensaje -->
+        {% if equipos %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Serie</th>
+                        <th>Estado</th>
+                        <th>Ubicación</th>
+                        <th>Responsable</th>
+                        <th>Ingreso</th>
+                        <th>Egreso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipo in equipos %}
+                    <tr class="text-center">
+                        <td>{{ equipo.id }}</td>
+                        <td>{{ equipo.tipo }}</td>
+                        <td>{{ equipo.marca }}</td>
+                        <td>{{ equipo.modelo }}</td>
+                        <td>{{ equipo.serie }}</td>
+                        <td>{{ equipo.estado }}</td>
+                        <td>{{ equipo.ubicacion }}</td>
+                        <td>{{ equipo.responsable }}</td>
+                        <td>{{ equipo.fecha_ingreso or '-' }}</td>
+                        <td>{{ equipo.fecha_egreso or '-' }}</td>
+                        <td>
+                            <a href="/editar/{{ equipo.id }}" class="btn btn-sm btn-warning mb-1">✏️ Editar</a>
+                            <a href="/eliminar/{{ equipo.id }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que quieres eliminar este equipo?')">🗑️ Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center mt-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="No encontrado" class="no-result mb-3">
+            <div class="alert alert-warning" role="alert">
+                ❌ No se encontraron resultados para tu búsqueda. Intenta con otro valor.
+            </div>
+            <a href="/" class="btn btn-outline-secondary">🔁 Volver a ver todo</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
