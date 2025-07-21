@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session, url_for
 import mysql.connector
 
 app = Flask(__name__)
+app.secret_key = 'clave_secreta_super_segura'
 
 def conectar():
     return mysql.connector.connect(
@@ -11,8 +12,37 @@ def conectar():
         database="inventario"
     )
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    mensaje = ''
+    if request.method == 'POST':
+        usuario = request.form['username']
+        clave = request.form['password']
+
+        conn = conectar()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios WHERE username = %s AND password = %s", (usuario, clave))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            session['usuario'] = user['username']
+            return redirect('/')
+        else:
+            mensaje = '⚠️ Usuario o contraseña incorrectos'
+
+    return render_template("login.html", mensaje=mensaje)
+
+@app.route('/logout')
+def logout():
+    session.pop('usuario', None)
+    return redirect('/login')
+
 @app.route('/')
 def index():
+    if 'usuario' not in session:
+        return redirect('/login')
+
     filtro = request.args.get('buscar', '')
     campo = request.args.get('campo', 'tipo')  # por defecto filtra por tipo
 
@@ -35,9 +65,11 @@ def index():
     return render_template("index.html", equipos=equipos, buscar=filtro, campo=campo)
 
 
-
 @app.route('/agregar', methods=["GET", "POST"])
 def agregar():
+    if 'usuario' not in session:
+        return redirect('/login')
+
     if request.method == "POST":
         tipo = request.form['tipo']
         marca = request.form['marca']
@@ -68,6 +100,9 @@ def agregar():
 
 @app.route('/eliminar/<int:id>')
 def eliminar(id):
+    if 'usuario' not in session:
+        return redirect('/login')
+
     conn = conectar()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM equipos WHERE id = %s", (id,))
@@ -78,6 +113,9 @@ def eliminar(id):
 
 @app.route('/editar/<int:id>', methods=["GET", "POST"])
 def editar(id):
+    if 'usuario' not in session:
+        return redirect('/login')
+
     conn = conectar()
     cursor = conn.cursor(dictionary=True)
 
